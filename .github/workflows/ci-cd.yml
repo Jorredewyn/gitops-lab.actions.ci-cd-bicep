@@ -1,0 +1,38 @@
+name:CI-CD
+
+on:
+ push:
+  branches:
+   - main:
+   paths-ignore:
+   - README.md
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+  
+  env:
+   AZURE_RG: githubjorre-actions-staged
+   AZURE_SUBSCRIPTION: fb66a6b4-92b0-4a41-9eda-36b9be286cd1
+   AZURE-LOCATION: eastUS
+   
+  jobs:
+   Build-job:
+   runs-on: ubuntu-latest
+   env:
+    configuration: release
+    
+   steps:
+    - name: Checkout Sources
+      uses: actions/checkout@v2
+    - name: Setup .NET
+      uses: actions/setup-dotnet@v2.0.0
+      with:
+       dotnet-version: 6.0.x
+    - name: Restore dependencies
+      run: dotnet restore 
+    - name: Build
+      run: dotnet build --no-restore --configuration ${{ env.configuration }}
+    - name: Testrun: dotnet test --no-build --verbosity normal --configuration ${{env.configuration }}
+    - name: Publish
+      run: dotnet publish --configuration ${{ env.configuration }} --output ${{runner.temp }}/publish
+       
